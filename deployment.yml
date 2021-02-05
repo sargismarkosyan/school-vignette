@@ -1,41 +1,42 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
-  name: school-vignette
+  name: vignette
   namespace: mskh
   labels:
-    app.kubernetes.io/name: school-vignette
+    app.kubernetes.io/name: vignette
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: school-vignette
+      app: vignette
   template:
     metadata:
       labels:
-        app: school-vignette
+        app: vignette
     spec:
       volumes:
-        - name: school-vignette-public
-          persistentVolumeClaim:
-            claimName: school-vignette-public-claim
+        - name: data
+          hostPath:
+            path: /var/www/volumes/site-data/vignette
+            type: DirectoryOrCreate
       containers:
-        - name: school-vignette
+        - name: vignette
           image: "tserobyan/school-vignette:latest"
           env:
             - name: DBURI
-              value: "mongodb://root:root@mongo:27017/school-vignette?authSource=admin"
+              value: "mongodb://root:root@mongo:27017/vignette?authSource=admin"
           volumeMounts:
             - mountPath: /app/public/images
-              name: school-vignette-public
+              name: data
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: school-vignette
+  name: vignette
   namespace: mskh
   labels:
-    app.kubernetes.io/name: school-vignette
+    app.kubernetes.io/name: vignette
   annotations:
     description: "https://github.com/tserobyan/school-vignette"
 spec:
@@ -44,4 +45,4 @@ spec:
       targetPort: 80
   type: LoadBalancer
   selector:
-    app: school-vignette
+    app: vignette
